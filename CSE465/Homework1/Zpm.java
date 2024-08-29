@@ -21,8 +21,14 @@ public class Zpm {
 
     String filename = args[0];
 
-    // Checking file type
-    if (filename.length() < 4) { //} || filename.substring(filename.length() - 4) != ".zpm") {
+    //Checking file type
+    if ((filename.length() <= 4)) {
+      System.out.println("File name too short");
+      return;
+    }
+    
+    String ext = filename.substring(filename.length()-4);
+    if (!(ext.equals(".zpm"))) {
       System.out.println("File name is not valid, please provide .zpm file.");
       return;
     }
@@ -36,6 +42,7 @@ public class Zpm {
       }
     } catch (IOException e) {
       System.err.println("Error occurred:" + e.getMessage());
+      return;
     }
 
     System.out.println("Sucessfully obtained file");
