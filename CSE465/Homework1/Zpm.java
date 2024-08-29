@@ -15,25 +15,37 @@ public class Zpm {
   public static void main(String[] args) {
     //Checking command line arguments
     if (args.length == 0) {
-      System.out.println("No file was given");
+      System.out.println("No file was given, please try again.");
       return;
     }
 
-    String filename = args[0];
+    String fileName = args[0];
+    int check = fileCheck(fileName);
 
-    //Checking file type
-    if ((filename.length() <= 4)) {
-      System.out.println("File name too short");
+    if (check == 1) {
+      System.out.println("Sucessfully obtained file");
+    } else {
+      System.out.println("File issues were detected, please try again.");
       return;
     }
+
     
-    String ext = filename.substring(filename.length()-4);
+  }
+
+  private static int fileCheck(String fileName) {
+    //Checking file type
+    if ((fileName.length() <= 4)) {
+      System.out.println("File name too short");
+      return 0;
+    }
+
+    String ext = fileName.substring(fileName.length()-4);
     if (!(ext.equals(".zpm"))) {
       System.out.println("File name is not valid, please provide .zpm file.");
-      return;
+      return 0;
     }
 
-    File zpmFile = new File(filename);
+    File zpmFile = new File(fileName);
 
     // Exception handling file access
     try {
@@ -42,9 +54,9 @@ public class Zpm {
       }
     } catch (IOException e) {
       System.err.println("Error occurred:" + e.getMessage());
-      return;
+      return 0;
     }
-
-    System.out.println("Sucessfully obtained file");
+    // No file issues were caught
+    return 1;
   }
 }
