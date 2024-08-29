@@ -1,3 +1,5 @@
+package CSE374;
+
 import java.util.Scanner;
 
 /** Obtain the location of two numbers that add up to the target total. 
