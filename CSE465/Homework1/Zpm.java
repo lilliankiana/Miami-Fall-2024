@@ -2,8 +2,12 @@ package CSE465.Homework1;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Interpreter that executs Z+- programs.
  *
@@ -53,32 +57,50 @@ public class Zpm {
     // Parse through file line by line
     while (scanner.hasNextLine()) {
       lineNumber++;
-      // Gets line in array without spaces
-      String[] line = scanner.nextLine().split(" ");
-      switchCase(line[0], line);
+
+      String line = scanner.nextLine();
+      List<String> lineData = new ArrayList<String>();
+
+      // Splits line by spaces unless there are quotes
+      Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(line);
+      while (m.find()) {
+        lineData.add(m.group(1));
+      }
+
+      switchCase(lineData);
     }
 
 
     scanner.close();
   }
 
-  private static void switchCase(String first, String[] line) {
-    switch(first) {
+  /** Checks if the start of the line is a function
+   * 
+   * @param lineData ArrayList containing the line data
+   */
+  private static void switchCase(List<String> lineData) {
+    switch(lineData.get(0)) {
       case "PRINT":
-        printing(line);
+        printing(lineData);
         break;
       case "FOR":
-        looping(line);
+        looping(lineData);
         break;
       default:
-        String variable = line[0];
-        String operation = line[1];
-        String value = line [2];
+        String variable = lineData.get(0);
+        String operation = lineData.get(1);
+        String value = lineData.get(2);
         variableChange(variable, operation, value);
 
     }
   }
 
+  /** Changes that variable information based on the command
+   * 
+   * @param variable Variable to be changed
+   * @param operation Operation to be performed
+   * @param value The new value to be used
+   */
   private static void variableChange(String variable, String operation, String value) {
     if (operation.equals("=")) {
       valueList.put(variable, value);
@@ -87,24 +109,60 @@ public class Zpm {
       if (valueList.get(value) != null) {
         value = valueList.get(value);
       }
+
+      // Checks for runtime errors with type issues
       int type = errorCheck(valueList.get(variable), value);
-      //try {
-        //if (operation.equals("+=")) {
 
-        //} else if (operation.equals("*=") && type == 1){
-
-        //} else if (operation.equals("-=") && type == 1)
-        //switch(operation) {
-          //case "+=":
-          //case "*=":
-          //case "-=":
-          //default:
-            //throw new 
-        //}
-      //} catch (UnsupportedOperationException ex) {
-        //  System.out.println("RUNTIME ERROR: line" + lineNumber);
-      //}
+      try {
+        if (operation.equals("+=") && type == 0) {
+          stringAdd(variable, value);
+        } else if (type == 1) {
+          integerOperation(variable, value, operation);
+        } else {
+          // If the conversions were trying to be done on strings
+          throw new UnsupportedOperationException();
+        }
+      } catch (UnsupportedOperationException ex) {
+          System.out.println("RUNTIME ERROR: line " + lineNumber);
+          System.exit(0);
+      }
     }
+  }
+
+  /** Performs calculations on variables that are integers
+   * 
+   * @param variable Variable to be changed
+   * @param operation Operation to be performed
+   * @param value The new value to be used
+   */
+  private static void integerOperation(String variable, String value, String operation) {
+    System.out.println(variable + " " + valueList.get(variable) + operation + value);
+    switch(operation) {
+      case "+=":
+        int sum = Integer.parseInt(valueList.get(variable)) + Integer.parseInt(value);
+        valueList.put(variable, String.valueOf(sum));
+        break;
+      case "*=":
+        int product = Integer.parseInt(valueList.get(variable)) * Integer.parseInt(value);
+        valueList.put(variable, String.valueOf(product));
+        break;
+      case "-=":
+        int difference = Integer.parseInt(valueList.get(variable)) - Integer.parseInt(value);
+        valueList.put(variable, String.valueOf(difference));
+        break;
+      default:
+    };
+  }
+
+  /** Adds strings together
+   * 
+   * @param variable Variable to be changed
+   * @param value The new value to be used
+   */
+  private static void stringAdd(String variable, String value) {
+    String original = valueList.get(variable).substring(0, valueList.get(variable).length() - 1);
+    value = value.substring(1, value.length());
+    valueList.put(variable, original+value);
   }
 
   /** Checks if the two values are compatible and their types
@@ -130,17 +188,22 @@ public class Zpm {
       }
     } catch (UnsupportedOperationException ex) {
         System.out.println("RUNTIME ERROR: line" + lineNumber);
+        System.exit(0);
     }
 
-    if (checkFirst) { // Is an integer
-      return 1;
-    } else { // Is a String
+    if (checkFirst) { // Is an Int
       return 0;
+    } else { // Is a string
+      return 1;
     }
   }
 
-  private static void looping(String[] line) {
-    int iterations = Integer.parseInt(line[0]);
+  /** Performs the loop function
+   * 
+   * @param lineData ArrayList containing the line data
+   */
+  private static void looping(List<String> lineData) {
+    int iterations = Integer.parseInt(lineData.get(0));
     for (int i = 0; i < iterations; i++) {
       // Send information to variableChange()
     }
@@ -148,10 +211,10 @@ public class Zpm {
 
   /** Prints the variable with value
    * 
-   * @param line Array of the line's string values
+   * @param lineData Array of the line's string values
    */
-  private static void printing(String[] line) {
-    String variable = line[1];
+  private static void printing(List<String> lineData) {
+    String variable = lineData.get(1);
     String value = valueList.get(variable);
     if (value.charAt(0) == '"') {
       value = value.substring(1, value.length() - 1);
