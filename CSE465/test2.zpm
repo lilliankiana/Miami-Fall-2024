@@ -1,0 +1,12 @@
+A = "hello" ;
+B = "world" ;
+A += " " ;
+A += B ;
+C = 12 ;
+D = 10 ;
+D -= 2 ;
+C += D ;
+PRINT A ;
+PRINT B ;
+PRINT C ;
+PRINT D ;

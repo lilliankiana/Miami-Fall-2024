@@ -136,7 +136,6 @@ public class Zpm {
    * @param value The new value to be used
    */
   private static void integerOperation(String variable, String value, String operation) {
-    System.out.println(variable + " " + valueList.get(variable) + operation + value);
     switch(operation) {
       case "+=":
         int sum = Integer.parseInt(valueList.get(variable)) + Integer.parseInt(value);
@@ -203,9 +202,26 @@ public class Zpm {
    * @param lineData ArrayList containing the line data
    */
   private static void looping(List<String> lineData) {
-    int iterations = Integer.parseInt(lineData.get(0));
+    // Amount of times to repeat
+    int iterations = Integer.parseInt(lineData.get(1));
+    
+    // Seperate statements by getting index and seperating
+    ArrayList<List<String>> loopList = new ArrayList<>();
+    int index = 2;
+    for (int i = 2; i < lineData.size(); i++) {
+      if (lineData.get(i).equals(";")) {
+        loopList.add(lineData.subList(index, i));
+        index = i + 1;
+      }
+
+    }
+
+    // Performs operations specified amount of times
     for (int i = 0; i < iterations; i++) {
-      // Send information to variableChange()
+      // Send information to switchCase() like a new line
+      for (int j = 0; j < loopList.size(); j++) {
+        switchCase(loopList.get(j));
+      }
     }
   }
 
