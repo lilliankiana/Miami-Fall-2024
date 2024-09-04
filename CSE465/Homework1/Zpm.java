@@ -91,7 +91,6 @@ public class Zpm {
         String operation = lineData.get(1);
         String value = lineData.get(2);
         variableChange(variable, operation, value);
-
     }
   }
 
@@ -102,24 +101,25 @@ public class Zpm {
    * @param value The new value to be used
    */
   private static void variableChange(String variable, String operation, String value) {
+    // Checks if value given is another variable
+    value = initializeError(value);
+
     if (operation.equals("=")) {
       valueList.put(variable, value);
     } else {
-      // Checks if value given is another variable
-      if (valueList.get(value) != null) {
-        value = valueList.get(value);
-      }
-
+      // Checks variable initialization
+      initializeError(variable);
       // Checks for runtime errors with type issues
       int type = errorCheck(valueList.get(variable), value);
 
       try {
+        // Type checking for operations
         if (operation.equals("+=") && type == 0) {
           stringAdd(variable, value);
         } else if (type == 1) {
           integerOperation(variable, value, operation);
         } else {
-          // If the conversions were trying to be done on strings
+          // Unsupported string operations
           throw new UnsupportedOperationException();
         }
       } catch (UnsupportedOperationException ex) {
@@ -127,6 +127,24 @@ public class Zpm {
           System.exit(0);
       }
     }
+  }
+
+  private static String initializeError(String value) {
+    char firstChar = value.charAt(0);
+    if (valueList.containsKey(value)) {
+      return valueList.get(value);
+    } 
+
+    try {
+      // It's a variable if it is not an int & doesn't contain quotes
+      if (firstChar != '"' && !Character.isDigit(firstChar)) {
+        throw new UnsupportedOperationException();
+      }
+    } catch (UnsupportedOperationException ex) {
+      System.out.println("RUNTIME ERROR: line " + lineNumber);
+      System.exit(0);
+    }
+    return value;
   }
 
   /** Performs calculations on variables that are integers
